@@ -66,9 +66,9 @@ The fix modifies and loads custom kernel modules. Ubuntu's Secure Boot will **bl
 
 | # | Video | Description |
 |---|-------|-------------|
-| 1 | ▶️ [**Complete Walkthrough — MT7902 Fix**](https://youtu.be/bjYPuqOtVgI) | Full driver understanding, installation process, and fix explained |
-| 2 | ▶️ [**How to Install Claude Desktop on Ubuntu**](https://youtu.be/NqMU9cL2LfE) | Setup Claude Desktop (Debian/Ubuntu) to use AI for driver fixing |
-| 3 | ▶️ *My Full Fix Video — Coming Soon!* | Step-by-step video walkthrough of this exact script |
+ 1 | ▶️ [**Complete Walkthrough — MT7902 Fix**](https://youtu.be/BtgeDrZrvkk) | Full driver understanding, installation process, and fix explained |
+| 2 | ▶️ [**Driver Walkthrough — MT7902 Fix**](https://youtu.be/bjYPuqOtVgI) | Full driver understanding, installation process, and fix explained |
+| 3 | ▶️ [**How to Install Claude Desktop on Ubuntu**](https://youtu.be/NqMU9cL2LfE) | Setup Claude Desktop (Debian/Ubuntu) to use AI for driver fixing |
 
 ---
 
