@@ -291,7 +291,7 @@ systemctl restart NetworkManager 2>/dev/null || true
 
 # Verify WiFi
 sleep 3
-if ip link show 2>/dev/null | grep -qE "wlo|wlp[0-9]"; then
+if ip link show 2>/dev/null | grep -qE "wlo[0-9]|wlp[0-9]"; then
     log "WiFi interface UP!"
     WIFI_WORKING=true
 else
@@ -449,6 +449,52 @@ sleep 1
 modprobe btusb && log "btusb patched loaded"
 sleep 5
 
+# ── 7e: Copy BT firmware to mt7902/ subfolder ──
+info "Copying BT firmware to mt7902/ subfolder..."
+mkdir -p "${FW_DIR}/mt7902"
+if [[ -f "${FW_DIR}/BT_RAM_CODE_MT7902_1_1_hdr.bin" ]]; then
+    cp -f "${FW_DIR}/BT_RAM_CODE_MT7902_1_1_hdr.bin" "${FW_DIR}/mt7902/"
+    log "BT firmware copied to ${FW_DIR}/mt7902/"
+else
+    warn "BT firmware not found — skipping copy"
+fi
+
+# ── 7f: Restart bluetooth service ──
+info "Restarting Bluetooth service..."
+systemctl restart bluetooth
+sleep 3
+
+# ── 7g: Activate Bluetooth controller ──
+info "Activating Bluetooth controller..."
+bluetoothctl power on   2>/dev/null && log "BT power on"     || warn "BT power on failed"
+bluetoothctl pairable on 2>/dev/null && log "BT pairable on" || warn "BT pairable on failed"
+bluetoothctl discoverable on 2>/dev/null && log "BT discoverable on" || warn "BT discoverable on failed"
+bluetoothctl scan on   2>/dev/null &
+sleep 5
+kill %1 2>/dev/null || true
+
+# ── 7h: Make BT settings persist across reboots ──
+info "Setting up BT auto-activation on boot..."
+cat > /etc/systemd/system/bt-autostart.service << 'EOF'
+[Unit]
+Description=MT7902 Bluetooth Auto-Activate
+After=bluetooth.service
+Requires=bluetooth.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 5
+ExecStart=/bin/bash -c 'bluetoothctl power on; bluetoothctl pairable on; bluetoothctl discoverable on'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable bt-autostart.service
+log "BT auto-activation service enabled!"
+
 # Verify BT
 if bluetoothctl show 2>/dev/null | grep -q "Controller"; then
     log "Bluetooth is UP!"
@@ -460,7 +506,7 @@ else
     warn "Bluetooth not yet active — setting up permanent config for next boot"
 fi
 
-# ── 7e: Permanent BT config ──
+# ── 7i: Permanent BT config ──
 cat > /etc/modules-load.d/mt7902-bt.conf << 'EOF'
 btbcm
 btintel
